@@ -1,0 +1,161 @@
+<html>
+    <head>
+        <script src="https://kit.fontawesome.com/57ac1a8fd8.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" type="text/css" href="/static/stylesheet.css">
+        <title>ColorPict</title>
+        <script>
+            function handle_img(pic) {
+                img = document.getElementsByClassName('image-display')[0];
+                img.setAttribute('src', 'data:image/jpeg;base64, ' + pic);
+            }
+            function handle_colors(colors) {
+                var hue = null;
+                window.colors = colors;
+                for (var i = 1; i <= 10; i++) {
+                    hue = document.getElementsByClassName('hue-' + i)[0];
+                    hue.style.background = 'rgb' + colors[i - 1];
+                }
+            }
+            function ignore_color(button) {
+                var this_color = button.parentNode.style.background;
+                button.parentNode.style.background = "#ccc";
+                this_color = '(' + this_color.split('(')[1].split(')')[0] + ')';
+                if (window.colors.includes(this_color)) {
+                    window.colors.splice(window.colors.indexOf(this_color), 1);
+                }
+                console.log(this_color);
+                console.log(window.colors);
+            }
+            function randomize_colors() {
+                var colors = [];
+                for (var i = 0; i < 10; i++) {
+                    colors.push('(' + Math.floor(Math.random() * 255) + ', ' + Math.floor(Math.random() * 255) + ', ' + Math.floor(Math.random() * 255) + ')');
+                }
+                handle_colors(colors);
+                document.getElementsByClassName('row-two')[0].scrollIntoView();
+            }
+            function recommend() {
+                var max_recs = window.colors.length;
+                if (max_recs > 5) {
+                    max_recs = 5;
+                }
+                var rec_colors = window.colors;
+                var reced_colors = [];
+                for (var i = 0; i < max_recs; i++) {
+                    rec_base_color = rec_colors[Math.floor(Math.random() * rec_colors.length)];
+                    rec_colors.splice(rec_colors.indexOf(rec_base_color), 1);
+                    reced_colors.push(rec_base_color);
+                    rec_base_color = rec_base_color.replace('(', '').replace(')', '').replace(/ /g, '').replace(/"/g, '').split(',')
+                    console.log(rec_base_color);
+                    rec_color = 'rgb(' + (255 - parseInt(rec_base_color[0])) + ', ' + (255 - parseInt(rec_base_color[1])) + ', ' + (255 - parseInt(rec_base_color[2])) + ')';
+                    document.getElementsByClassName('hue-rec-' + (i + 1))[0].style.background = rec_color;
+                    console.log(rec_color);
+                }
+                reced_colors.forEach(function (r) {
+                    window.colors.push(r);
+                });
+                document.getElementsByTagName('hr')[0].scrollIntoView();
+            }
+            function submit_form(form) {
+                var input = document.querySelector('input[type="file"]')
+                var data = new FormData(form);
+                data.append('file', input.files[0]);
+                fetch(form.action, {
+                    method: form.method,
+                    body: data,
+                }).then((response) => {
+                    return response.json();
+                })
+                .then((resp) => {
+                    console.log(resp);
+                    handle_colors(resp['colors']);
+                    handle_img(resp['pic'])
+                    document.getElementsByClassName('row-two')[0].scrollIntoView();
+                });
+                return false;
+            }
+        </script>
+    </head>
+    
+    <body>
+        <nav class="nav-bar">
+            <a href="/" class="nav-link"><img alt="ColorPict" src="/static/logo.png"></a>
+            <div class="nav-right">
+                <a class="nav-button" href="/about/">About Us</a>
+                <button class="nav-button" onclick="randomize_colors()">Randomize Pallete</button>
+            </div>
+        </nav>
+        
+        <div class="row-one">
+            <div class="row-one-left">
+                <p class="tagline-bubble">
+                    <span>Picky about colors?</span>
+                    <br>
+                    <span>Here is <span class="colorpict">ColorPict</span>.</span>
+                </p>
+                <p class="instructions-row-one">
+                    Pick as you scroll and save your<br>recommended <span class="asthetic">asthetic</span> palletes:
+                </p>
+            </div>
+            <div class="row-one-right">
+                <span class="question-one">Pick Base Colors From Image:</span>
+                <center><form action="/proc_img/" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label class="obtain-picture">
+                        <input type="file" accept="image/*" name="image" onchange="submit_form(this.parentNode.parentNode)"/>
+                        <i class="fas fa-camera-retro"></i>
+                            Select or Take Picture
+                    </label>
+                </form></center>
+        
+            </div>
+        </div>
+        <div class="row-two">
+            <div class="row-two-left">
+                <div>
+                    <center>
+                        <img alt="img" class="image-display" src="/static/mascot.png" />
+                    </center>
+                </div>
+            </div>
+            <div class="row-two-right">
+                <span class="question-one">Remove any detected hues you wish to ignore:</span>
+                <center><table class="hues" cellspacing="50">
+                    <tr>
+                        <td class="hue hue-1"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue hue-2"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue hue-3"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue hue-4"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue hue-5"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                    </tr>
+                    <tr>
+                        <td class="hue hue-6"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue hue-7"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue hue-8"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue hue-9"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue hue-10"><a class="hue-delete" onclick="ignore_color(this);"><i class="fas fa-minus-circle"></i></a></td>
+                    </tr>
+                    </table>
+                    <button class="recommend" onclick="recommend();">Recommend!</button>
+                    </center>
+                
+            </div>
+        </div>
+        <hr>
+        <span class="rec-bubble">Here are our recommendations:
+        </span>
+        <p class="rec-info">
+            Our algorithm works out the best color<br>combinations with your input colors.
+        </p>
+        <center><span class="add-info">Add</span><table class="hues" cellspacing="50">
+                    <tr>
+                        <td class="hue-rec hue-rec-1"><a class="hue-delete"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue-rec hue-rec-2"><a class="hue-delete"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue-rec hue-rec-3"><a class="hue-delete"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue-rec hue-rec-4"><a class="hue-delete"><i class="fas fa-minus-circle"></i></a></td>
+                        <td class="hue-rec hue-rec-5"><a class="hue-delete"><i class="fas fa-minus-circle"></i></a></td>
+                    </tr>
+                    </table><span class="to-info">to your shopping list.</center>
+
+    </body>
+</html>
