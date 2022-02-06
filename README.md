@@ -2,7 +2,7 @@
 
 ## About the project
 
-# TODO: Write this.
+> A system to detect the color pallet you are already using through an image and recommend compatible colors.
 
 ## Installation (dev version)
 
