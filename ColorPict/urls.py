@@ -20,12 +20,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 
-from pict_color.views import upload_image, naive_upload_image
+from pict_color.views import upload_image
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', TemplateView.as_view(template_name='index.html')),
-    path('n/', TemplateView.as_view(template_name='index.bak.html')),
     path('proc_img/', upload_image),
-    path('nproc_img/', naive_upload_image),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
